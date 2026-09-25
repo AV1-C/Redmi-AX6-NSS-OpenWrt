@@ -61,7 +61,7 @@ if [ -d "$FEEDS_PATH/packages/lang/rust" ]; then
 fi
 
 # 修復 luci-app-statistics：儲存局部設定時不刪除未修改的設定
-STAT_APP="$PKG_PATH/../feeds/luci/applications/luci-app-statistics"
+STAT_APP="$FEEDS_PATH/luci/applications/luci-app-statistics"
 STAT_VIEW="$STAT_APP/htdocs/luci-static/resources/view/statistics"
 COLLECTD_JS="$STAT_VIEW/collectd.js"
 STAT_CONFIG="$STAT_APP/root/etc/config/luci_statistics"
