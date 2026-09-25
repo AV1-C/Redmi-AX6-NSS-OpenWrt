@@ -62,3 +62,17 @@ if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
 		echo "qualcommax set up nowifi successfully!"
 	fi
 fi
+
+# 預設時區與 NTP
+sed -i "s|set system.@system\\[-1\\].timezone='.*'|set system.@system[-1].timezone='CST-8'|" "$CFG_FILE"
+sed -i "s|set system.@system\\[-1\\].zonename='.*'|set system.@system[-1].zonename='Asia/Taipei'|" "$CFG_FILE"
+
+sed -i "/delete system.ntp/,/EOF/ { /add_list system.ntp.server/d }" "$CFG_FILE"
+sed -i "/set system.ntp.enable_server='0'/a\\
+\t\tadd_list system.ntp.server='0.openwrt.pool.ntp.org'\\
+\t\tadd_list system.ntp.server='1.openwrt.pool.ntp.org'\\
+\t\tadd_list system.ntp.server='2.openwrt.pool.ntp.org'\\
+\t\tadd_list system.ntp.server='3.openwrt.pool.ntp.org'" "$CFG_FILE"
+
+# 預設 Wi-Fi 國碼：TW（Taiwan）
+sed -i "s#country='\${country || 'CN'}'#country='TW'#" "$WIFI_UC"
