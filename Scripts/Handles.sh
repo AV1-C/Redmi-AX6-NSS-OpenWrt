@@ -59,3 +59,43 @@ if [ -d "$FEEDS_PATH/packages/lang/rust" ]; then
 		echo "rust fix failed; continuing!"
 	fi
 fi
+
+# 修復 luci-app-statistics：儲存局部設定時不刪除未修改的設定
+STAT_APP="$PKG_PATH/../feeds/luci/applications/luci-app-statistics"
+STAT_VIEW="$STAT_APP/htdocs/luci-static/resources/view/statistics"
+COLLECTD_JS="$STAT_VIEW/collectd.js"
+STAT_CONFIG="$STAT_APP/root/etc/config/luci_statistics"
+
+if [ -d "$STAT_VIEW" ] && [ -f "$COLLECTD_JS" ] && [ -f "$STAT_CONFIG" ]; then
+	# 對所有 statistics 設定頁：
+	# 1. 預設值不視為可刪除的空值
+	# 2. depends() 暫時不成立時保留原 UCI 設定
+	while IFS= read -r JS_FILE; do
+		if ! grep -Fq 'statistics-save-fix' "$JS_FILE"; then
+			sed -i \
+				-e "/^[[:space:]]*o\.default[[:space:]]*=/a\\
+		o.rmempty = false; // statistics-save-fix" \
+				-e "/^[[:space:]]*o\.depends(/a\\
+		o.retain = true; // statistics-save-fix" \
+				"$JS_FILE"
+		fi
+	done < <(find "$STAT_VIEW" -type f -name '*.js')
+
+	# collectd.js 的 plugin enable 是變數 enabled，不是 o
+	if ! grep -Fq 'statistics-plugin-enable-fix' "$COLLECTD_JS"; then
+		sed -i "/enabled.modalonly = false;/a\\
+			enabled.rmempty = false; // statistics-plugin-enable-fix\\
+			enabled.retain = true;" "$COLLECTD_JS"
+	fi
+
+	# DynamicList 必須採用 UCI list，避免 RRATimespans 每次儲存都被刪除後重建
+	if grep -Fq "option RRATimespans '2hour 1day 1week 1month 1year'" "$STAT_CONFIG"; then
+		sed -i "s/^[[:space:]]*option RRATimespans '2hour 1day 1week 1month 1year'/	list RRATimespans '2hour'\\
+	list RRATimespans '1day'\\
+	list RRATimespans '1week'\\
+	list RRATimespans '1month'\\
+	list RRATimespans '1year'/" "$STAT_CONFIG"
+	fi
+
+	echo "luci-app-statistics save fix applied"
+fi
