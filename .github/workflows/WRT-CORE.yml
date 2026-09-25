@@ -266,7 +266,7 @@ jobs:
             WIFI名稱：${{env.WRT_SSID}}
             WIFI密碼：${{env.WRT_WORD}}
 
-            内核版本：${{env.WRT_KVER}}
+            內核版本：${{env.WRT_KVER}}
             插件列表：${{env.WRT_LIST}}
 
   cache-rollover:
