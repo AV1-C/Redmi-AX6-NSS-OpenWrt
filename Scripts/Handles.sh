@@ -67,6 +67,7 @@ COLLECTD_JS="$STAT_VIEW/collectd.js"
 STAT_CONFIG="$STAT_APP/root/etc/config/luci_statistics"
 
 if [ -d "$STAT_VIEW" ] && [ -f "$COLLECTD_JS" ] && [ -f "$STAT_CONFIG" ]; then
+	echo " "
 	# 對所有 statistics 設定頁：
 	# 1. 預設值不視為可刪除的空值
 	# 2. depends() 暫時不成立時保留原 UCI 設定
